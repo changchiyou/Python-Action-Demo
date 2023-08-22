@@ -54,14 +54,14 @@ jobs:
       - name: Comment the result of pylint&pytest
         run: |
           if [ "$pylint_exit_code" = 0 ]; then
-            pylint_result=":green_circle: **`pylint` passed**"
+            pylint_result=":green_circle: **\`pylint\` passed**"
           else
-            pylint_result=":red_circle: **`pylint` failed**"
+            pylint_result=":red_circle: **\`pylint\` failed**"
           fi
           if [ "$pytest_exit_code" = 0 ]; then
-            pytest_result=":green_circle: **`pytest` passed**"
+            pytest_result=":green_circle: **\`pytest\` passed**"
           else
-            pytest_result=":red_circle: **`pytest` failed**"
+            pytest_result=":red_circle: **\`pytest\` failed**"
           fi
           content="$pylint_result
           "$pytest_result"
