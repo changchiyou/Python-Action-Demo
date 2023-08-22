@@ -21,6 +21,7 @@ jobs:
           pip install pylint ruff pytest
       - name: Analysing the code with pylint
         run: |
+          cd python-package
           pylint $(git ls-files '*.py') \
           --ignore=" \
             build, \
@@ -48,11 +49,13 @@ jobs:
         continue-on-error: true
       - name: Test with pytest
         run: |
+          cd python-package
           pytest > pytest.txt
           pytest_exit_code=$?
         continue-on-error: true
       - name: Comment the result of pylint&pytest
         run: |
+          cd python-package
           if [ "$pylint_exit_code" = 0 ]; then
             pylint_result=":green_circle: **\`pylint\` passed**"
           else
