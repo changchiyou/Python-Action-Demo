@@ -1,10 +1,10 @@
-name: Pylint
+name: Pylint & Pytest
 
 on: issue_comment
 
 jobs:
   build:
-    if: contains(github.event.comment.body, 'PYLINT')
+    if: github.event.comment.body == 'PYLINT&PYTEST'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -18,7 +18,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pylint
+          pip install pylint ruff pytest
       - name: Analysing the code with pylint
         run: |
           pylint $(git ls-files '*.py') \
@@ -43,4 +43,31 @@ jobs:
             pylint.extensions.broad_try_clause, \
             pylint.extensions.dict_init_mutate, \
             pylint.extensions.consider_refactoring_into_while_condition, \
-          "
+          " > pylint.txt
+          pylint_exit_code=$?
+        continue-on-error: true
+      - name: Test with pytest
+        run: |
+          pytest > pytest.txt
+          pytest_exit_code=$?
+        continue-on-error: true
+      - name: Comment the result of pylint&pytest
+        run: |
+          if [ $pylint_exit_code -eq 0 ]; then
+            pylint_result = ":green_circle: pylint passed"
+          else
+            pylint_result = ":red_circle: pylint failed"
+          fi
+          if [ $pytest_exit_code -eq 0 ]; then
+            pytest_result = ":green_circle: pytest passed"
+          else
+            pytest_result = ":red_circle: pytest failed"
+          fi
+          content = "$pylint_result\n$pytest_result"
+          if [ "${{ github.event.issue.pull_request }}" = true ] ; then
+            gh pr comment "${{ github.event.issue.number }}" --body "$content"
+          else
+            gh issue comment "${{ github.event.issue.number }}" --body "$content"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
