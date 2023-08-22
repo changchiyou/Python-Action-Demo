@@ -64,7 +64,7 @@ jobs:
             pytest_result=":red_circle: **\`pytest\` failed**"
           fi
 
-          echo -e "- $pylint_result\n<details><summary>pylint result</summary>${cat pylint.txt}</details>- $pytest_result" > msg
+          echo -e "- $pylint_result\n<details><summary>pylint result</summary>${cat pylint.txt}</details>\n- $pytest_result" > msg
           export msg=$(cat msg)
 
           if [ "${{ github.event.issue.pull_request }}" = true ] ; then
