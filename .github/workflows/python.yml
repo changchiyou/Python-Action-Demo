@@ -63,8 +63,7 @@ jobs:
           else
             pytest_result=":red_circle: **\`pytest\` failed**"
           fi
-          content="$pylint_result
-          "$pytest_result"
+          content="$pylint_result\n$pytest_result"
           if [ "${{ github.event.issue.pull_request }}" = true ] ; then
             gh pr comment "${{ github.event.issue.number }}" --body "$content"
           else
