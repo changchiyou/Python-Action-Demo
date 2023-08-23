@@ -45,21 +45,21 @@ jobs:
             pylint.extensions.dict_init_mutate, \
             pylint.extensions.consider_refactoring_into_while_condition, \
           " > pylint.txt
-          pylint_exit_code=$?
+          echo "PYLINT_EXIT_CODE=$?" >> $GITHUB_ENV
         continue-on-error: true
       - name: Test with pytest
         run: |
           pytest > pytest.txt
-          pytest_exit_code=$?
+          echo "PYTEST_EXIT_CODE=$?" >> $GITHUB_ENV
         continue-on-error: true
       - name: Comment the result of pylint&pytest
         run: |
-          if [ $pylint_exit_code -eq 0 ]; then
+          if [ ${{ env.PYLINT_EXIT_CODE }} -eq 0 ]; then
             pylint_result=":green_circle: **\`pylint\` passed**"
           else
             pylint_result=":red_circle: **\`pylint\` failed**"
           fi
-          if [ $pytest_exit_code -eq 0 ]; then
+          if [ ${{ env.PYTEST_EXIT_CODE }}} -eq 0 ]; then
             pytest_result=":green_circle: **\`pytest\` passed**"
           else
             pytest_result=":red_circle: **\`pytest\` failed**"
