@@ -23,7 +23,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install pylint ruff pytest
           if [ ${{ github.event.issue.pull_request }} ] ; then
-            pip install git+https://github.com/changchiyou/Github-Action-Test.git@${GITHUB_REF#refs/heads/}#subdirectory=python-package
+            echo ${GITHUB_HEAD_REF}
+            pip install git+https://github.com/changchiyou/Github-Action-Test.git@${GITHUB_HEAD_REF}#subdirectory=python-package
           else
             pip install git+https://github.com/changchiyou/Github-Action-Test.git#subdirectory=python-package
           fi
