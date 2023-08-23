@@ -23,12 +23,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install pylint ruff pytest
           if [ ${{ github.event.issue.pull_request }} ] ; then
-            echo ${GITHUB_REF#refs/heads/}
-            echo ${GITHUB_REF#refs/bases/}
-            echo ${GITHUB_REF}
-            echo ${GITHUB_HEAD_REF}
-            echo ${GITHUB_BASE_REF}
-            pip install git+https://github.com/changchiyou/Github-Action-Test.git@${GITHUB_REF#refs/heads/}#subdirectory=python-package
+            pr_info=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${{ github.event.issue.number }}")
+            source_branch=$(echo "$pr_info" | jq -r '.head.ref')
+            base_branch=$(echo "$pr_info" | jq -r '.base.ref')
+            echo $pr_info
+            pip install git+https://github.com/changchiyou/Github-Action-Test.git@${source_branch}#subdirectory=python-package
           else
             pip install git+https://github.com/changchiyou/Github-Action-Test.git#subdirectory=python-package
           fi
