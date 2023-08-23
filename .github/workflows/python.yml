@@ -61,7 +61,7 @@ jobs:
           else
             pylint_result=":red_circle: **\`pylint\` failed**"
           fi
-          if [ ${{ steps.pytest.outputs.PYTEST_EXIT_CODE }}} -eq 0 ]; then
+          if [ ${{ steps.pytest.outputs.PYTEST_EXIT_CODE }} -eq 0 ]; then
             pytest_result=":green_circle: **\`pytest\` passed**"
           else
             pytest_result=":red_circle: **\`pytest\` failed**"
