@@ -22,7 +22,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pylint ruff pytest
-          if [ "${{ github.event.issue.pull_request }}" = true ] ; then
+          if [ "${{ github.event.issue.pull_request }}" ] ; then
             pip install git+https://github.com/changchiyou/Github-Action-Test.git@$GITHUB_HEAD_REF#subdirectory=python-package
           else
             pip install git+https://github.com/changchiyou/Github-Action-Test.git#subdirectory=python-package
@@ -79,7 +79,7 @@ jobs:
           echo -e "- $pylint_result\n\t<details><summary>pylint result</summary>\n\n$(cat pylint.txt | sed 's/^/\t/')\n\t</details>\n- $pytest_result\n\t<details><summary>pytest result</summary>\n\n$(cat pytest.txt | sed 's/^/\t/')\n\t</details>" > msg
           export msg=$(cat msg)
 
-          if [ "${{ github.event.issue.pull_request }}" = true ] ; then
+          if [ "${{ github.event.issue.pull_request }}" ] ; then
             gh pr comment "${{ github.event.issue.number }}" --body "$msg"
           else
             gh issue comment "${{ github.event.issue.number }}" --body "$msg"
