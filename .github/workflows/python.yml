@@ -25,6 +25,9 @@ jobs:
           if [ ${{ github.event.issue.pull_request }} ] ; then
             echo ${GITHUB_REF#refs/heads/}
             echo ${GITHUB_REF#refs/bases/}
+            echo ${GITHUB_REF}
+            echo ${GITHUB_HEAD_REF}
+            echo ${GITHUB_BASE_REF}
             pip install git+https://github.com/changchiyou/Github-Action-Test.git@${GITHUB_REF#refs/heads/}#subdirectory=python-package
           else
             pip install git+https://github.com/changchiyou/Github-Action-Test.git#subdirectory=python-package
