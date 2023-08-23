@@ -57,14 +57,16 @@ jobs:
             pylint.extensions.broad_try_clause, \
             pylint.extensions.dict_init_mutate, \
             pylint.extensions.consider_refactoring_into_while_condition, \
-          " | tee pylint.txt
+          " > pylint.txt
           echo "PYLINT_EXIT_CODE=$?" >> $GITHUB_OUTPUT
+          cat pylint.txt
         continue-on-error: true
       - name: Test with pytest
         id: pytest
         run: |
-          pytest | tee pytest.txt
+          pytest > pytest.txt
           echo "PYTEST_EXIT_CODE=$?" >> $GITHUB_OUTPUT
+          cat pytest.txt
         continue-on-error: true
       - name: Comment the result of pylint&pytest
         run: |
