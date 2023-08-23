@@ -23,15 +23,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install pylint ruff pytest
           if [ ${{ github.event.issue.pull_request }} ] ; then
-            pr_info=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            pr_info=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
               "https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${{ github.event.issue.number }}")
             source_branch=$(echo "$pr_info" | jq -r '.head.ref')
-            base_branch=$(echo "$pr_info" | jq -r '.base.ref')
-            echo $pr_info
             pip install git+https://github.com/changchiyou/Github-Action-Test.git@${source_branch}#subdirectory=python-package
           else
             pip install git+https://github.com/changchiyou/Github-Action-Test.git#subdirectory=python-package
           fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Analysing the code with pylint
         id: pylint
         run: |
@@ -57,13 +57,13 @@ jobs:
             pylint.extensions.broad_try_clause, \
             pylint.extensions.dict_init_mutate, \
             pylint.extensions.consider_refactoring_into_while_condition, \
-          " > pylint.txt
+          " | tee pylint.txt
           echo "PYLINT_EXIT_CODE=$?" >> $GITHUB_OUTPUT
         continue-on-error: true
       - name: Test with pytest
         id: pytest
         run: |
-          pytest > pytest.txt
+          pytest | tee pytest.txt
           echo "PYTEST_EXIT_CODE=$?" >> $GITHUB_OUTPUT
         continue-on-error: true
       - name: Comment the result of pylint&pytest
