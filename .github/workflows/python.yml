@@ -2,6 +2,8 @@ name: Pylint & Pytest
 
 on: issue_comment
 
+permissions: read-all
+
 jobs:
   build:
     if: github.event.comment.body == 'PYLINT&PYTEST'
@@ -19,7 +21,13 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pylint ruff pytest
-          pip install python-package/
+          if [ "${{ github.event.issue.pull_request }}" = true ] ; then
+            pip install git+https://github.com/changchiyou/Github-Action-Test/archive/$GITHUB_HEAD_REF.zip
+          else
+            pip install git+https://github.com/changchiyou/Github-Action-Test/archive/main.zip
+          fi
+        env:
+          GITHUB_HEAD_REF: ${{ github.head_ref }}
       - name: Analysing the code with pylint
         id: pylint
         run: |
