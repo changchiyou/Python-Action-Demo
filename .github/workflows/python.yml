@@ -21,6 +21,7 @@ jobs:
           pip install pylint ruff pytest
           pip install python-package/
       - name: Analysing the code with pylint
+        id: pylint
         run: |
           pylint $(git ls-files '*.py') \
           --ignore=" \
@@ -45,21 +46,22 @@ jobs:
             pylint.extensions.dict_init_mutate, \
             pylint.extensions.consider_refactoring_into_while_condition, \
           " > pylint.txt
-          echo "PYLINT_EXIT_CODE=$?" >> $GITHUB_ENV
+          echo "PYLINT_EXIT_CODE=$?" >> $GITHUB_OUTPUT
         continue-on-error: true
       - name: Test with pytest
+        id: pytest
         run: |
           pytest > pytest.txt
-          echo "PYTEST_EXIT_CODE=$?" >> $GITHUB_ENV
+          echo "PYTEST_EXIT_CODE=$?" >> $GITHUB_OUTPUT
         continue-on-error: true
       - name: Comment the result of pylint&pytest
         run: |
-          if [ ${{ env.PYLINT_EXIT_CODE }} -eq 0 ]; then
+          if [ ${{ steps.pylint.outputs.PYLINT_EXIT_CODE }} -eq 0 ]; then
             pylint_result=":green_circle: **\`pylint\` passed**"
           else
             pylint_result=":red_circle: **\`pylint\` failed**"
           fi
-          if [ ${{ env.PYTEST_EXIT_CODE }}} -eq 0 ]; then
+          if [ ${{ steps.pytest.outputs.PYTEST_EXIT_CODE }}} -eq 0 ]; then
             pytest_result=":green_circle: **\`pytest\` passed**"
           else
             pytest_result=":red_circle: **\`pytest\` failed**"
