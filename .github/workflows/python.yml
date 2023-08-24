@@ -42,9 +42,6 @@ jobs:
         id: pylint
         run: |
           cd ${GITHUB_REPOSITORY##*/}/
-          if [ ${{ github.event.issue.pull_request }} ] ; then
-            git checkout ${{ steps.install.outputs.SOURCE_BRANCH }}
-          fi
 
           pylint $(git ls-files '*.py') \
           --ignore=" \
@@ -76,9 +73,6 @@ jobs:
         id: pytest
         run: |
           cd ${GITHUB_REPOSITORY##*/}/
-          if [ ${{ github.event.issue.pull_request }} ] ; then
-            git checkout ${{ steps.install.outputs.SOURCE_BRANCH }}
-          fi
 
           pytest > pytest.txt
           echo "PYTEST_EXIT_CODE=$?" >> $GITHUB_OUTPUT
@@ -97,6 +91,7 @@ jobs:
             pytest_result=":red_circle: **\`pytest\` failed**"
           fi
 
+          cd ${GITHUB_REPOSITORY##*/}/
           echo -e "- $pylint_result\n\t<details><summary>pylint result</summary>\n\n$(cat pylint.txt | sed 's/^/\t/')\n\t</details>\n- $pytest_result\n\t<details><summary>pytest result</summary>\n\n$(cat pytest.txt | sed 's/^/\t/')\n\t</details>" > msg
           export msg=$(cat msg)
 
