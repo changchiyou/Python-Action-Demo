@@ -70,12 +70,12 @@ jobs:
         continue-on-error: true
       - name: Comment the result of pylint&pytest
         run: |
-          if [ ${{ steps.pylint.outputs.PYLINT_EXIT_CODE }} -eq 0 ]; then
+          if [ ! -z "${{ steps.pylint.outputs.PYLINT_EXIT_CODE }}" ] && [ ${{ steps.pylint.outputs.PYLINT_EXIT_CODE }} -eq 0 ]; then
             pylint_result=":green_circle: **\`pylint\` passed**"
           else
             pylint_result=":red_circle: **\`pylint\` failed**"
           fi
-          if [ ${{ steps.pytest.outputs.PYTEST_EXIT_CODE }} -eq 0 ]; then
+          if [ ! -z "${{ steps.pytest.outputs.PYTEST_EXIT_CODE }}" ] && [ ${{ steps.pytest.outputs.PYTEST_EXIT_CODE }} -eq 0 ]; then
             pytest_result=":green_circle: **\`pytest\` passed**"
           else
             pytest_result=":red_circle: **\`pytest\` failed**"
