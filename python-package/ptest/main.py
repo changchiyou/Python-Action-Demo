@@ -1,4 +1,8 @@
+"""demo python script."""
+
+
 def hello():
+    """demo function."""
     print("hello")
 
 
