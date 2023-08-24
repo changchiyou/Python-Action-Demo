@@ -8,3 +8,7 @@ def test_print(capsys):
 
     captured = capsys.readouterr()
     assert captured.out == "hello\n"
+
+
+def test_failed():
+    assert False
