@@ -100,7 +100,7 @@ jobs:
               <summary>pylint result</summary>
 
               \`\`\`
-              $(cat pylint.txt | sed 's/^/  /')
+            $(cat pylint.txt | sed 's/^/  /')
               \`\`\`
             </details>
           - $pytest_result
@@ -108,7 +108,7 @@ jobs:
               <summary>pytest result</summary>
 
               \`\`\`
-              $(cat pytest.txt | sed 's/^/  /')
+            $(cat pytest.txt | sed 's/^/  /')
               \`\`\`
             </details>
           """ > msg
