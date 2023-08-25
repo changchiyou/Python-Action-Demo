@@ -92,7 +92,26 @@ jobs:
           fi
 
           cd ${GITHUB_REPOSITORY##*/}/
-          echo -e "- $pylint_result\n  <details>\n    <summary>pylint result</summary>\n\n    \`\`\`\n$(cat pylint.txt | sed 's/^/  /')\n    \`\`\`\n  </details>\n- $pytest_result\n  <details>\n    <summary>pytest result</summary>\n\n    \`\`\`\n$(cat pytest.txt | sed 's/^/  /')\n    \`\`\`\n  </details>" > msg
+
+          echo -e \
+          """
+          - $pylint_result
+            <details>
+              <summary>pylint result</summary>
+
+              \`\`\`
+              $(cat pylint.txt | sed 's/^/  /')
+              \`\`\`
+            </details>
+          - $pytest_result
+            <details>
+              <summary>pytest result</summary>
+
+              \`\`\`
+              $(cat pytest.txt | sed 's/^/  /')
+              \`\`\`
+            </details>
+          """ > msg
           export msg=$(cat msg)
 
           if [ ${{ github.event.issue.pull_request }} ] ; then
