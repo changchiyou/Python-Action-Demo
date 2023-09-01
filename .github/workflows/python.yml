@@ -95,7 +95,7 @@ jobs:
 
           github_user_id=$(echo "${{ github.event.comment.user.login }}" | sed 's/ /_/g')
           triggered_comment_url="https://github.com/${GITHUB_REPOSITORY}/issues/${{ github.event.issue.number }}#issuecomment-${{ github.event.comment.id }}"
-          commit_hash=$(git rev-parse HEAD | cut -d' ' -f1-7)
+          commit_hash=$(git rev-parse --short=7 HEAD)
           commit_url="https://github.com/${GITHUB_REPOSITORY}/commit/${commit_hash}"
 
           if [ ${{ github.event.issue.pull_request }} ] ; then
