@@ -99,7 +99,7 @@ jobs:
           commit_url="https://github.com/${GITHUB_REPOSITORY}/commit/${commit_hash}"
 
           if [ ${{ github.event.issue.pull_request }} ] ; then
-          commit_badge="<a href=\"${commit_url}\"><img alt=\"Static Badge\" src=\"https://img.shields.io/badge/COMMIT-${commit_hash}-red\">"
+            commit_badge="<a href=\"${commit_url}\"><img alt=\"Static Badge\" src=\"https://img.shields.io/badge/COMMIT-${commit_hash}-red\">"
           else
             commit_badage=""
           fi
