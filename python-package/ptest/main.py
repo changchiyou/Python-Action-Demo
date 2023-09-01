@@ -3,7 +3,7 @@
 
 def hello():
     """demo function."""
-    print("hello")
+    print("hello")  # test
 
 
 if __name__ == "__main__":
