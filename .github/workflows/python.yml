@@ -12,12 +12,21 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.10"]
+    outputs:
+      SOURCE_BRANCH: ${{ steps.install.outputs.SOURCE_BRANCH }}
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Cache Python dependencies
+        uses: actions/cache@v3
+        with:
+          path: ./${GITHUB_REPOSITORY##*/}/**
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
       - name: Install dependencies
         id: install
         run: |
@@ -31,17 +40,38 @@ jobs:
             pr_info=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
               "https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${{ github.event.issue.number }}")
             source_branch=$(echo "$pr_info" | jq -r '.head.ref')
-            echo "SOURCE_BRANCH=$source_branch" >> $GITHUB_OUTPUT
+            echo "SOURCE_BRANCH=$source_branch" >> "$GITHUB_OUTPUT"
 
             git checkout ${source_branch}
           fi
           pip install python-package/
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  pylint:
+    if: github.event.comment.body == 'PYLINT&PYTEST'
+    runs-on: ubuntu-latest
+    needs: build
+    strategy:
+      matrix:
+        python-version: ["3.10"]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Cache Python dependencies
+        uses: actions/cache@v3
+        with:
+          path: ./${GITHUB_REPOSITORY##*/}/**
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
       - name: Analysing the code with pylint
         id: pylint
         run: |
           cd ${GITHUB_REPOSITORY##*/}/
+          git checkout ${SOURCE_BRANCH}
 
           pylint $(git ls-files '*.py') \
           --ignore=" \
@@ -66,17 +96,22 @@ jobs:
             pylint.extensions.dict_init_mutate, \
             pylint.extensions.consider_refactoring_into_while_condition, \
           " > pylint.txt
-          echo "PYLINT_EXIT_CODE=$?" >> $GITHUB_OUTPUT
+          echo "PYLINT_EXIT_CODE=$?" >> "$GITHUB_OUTPUT"
           cat pylint.txt
+        env:
+          SOURCE_BRANCH: ${{ needs.build.outputs.SOURCE_BRANCH }}
         continue-on-error: true
       - name: Test with pytest
         id: pytest
         run: |
           cd ${GITHUB_REPOSITORY##*/}/
+          git checkout ${SOURCE_BRANCH}
 
           pytest > pytest.txt
-          echo "PYTEST_EXIT_CODE=$?" >> $GITHUB_OUTPUT
+          echo "PYTEST_EXIT_CODE=$?" >> "$GITHUB_OUTPUT"
           cat pytest.txt
+        env:
+          SOURCE_BRANCH: ${{ needs.build.outputs.SOURCE_BRANCH }}
         continue-on-error: true
       - name: Comment the result of pylint&pytest
         run: |
@@ -92,6 +127,7 @@ jobs:
           fi
 
           cd ${GITHUB_REPOSITORY##*/}/
+          git checkout ${SOURCE_BRANCH}
 
           github_user_id=$(echo "${{ github.event.comment.user.login }}" | sed 's/ /_/g' | sed 's/-/--/g' | sed 's/_/__/g')
           triggered_comment_url="https://github.com/${GITHUB_REPOSITORY}/issues/${{ github.event.issue.number }}#issuecomment-${{ github.event.comment.id }}"
@@ -99,7 +135,7 @@ jobs:
           commit_url="https://github.com/${GITHUB_REPOSITORY}/commit/${commit_hash}"
 
           if [ ${{ github.event.issue.pull_request }} ] ; then
-            branch_name=${{ steps.install.outputs.SOURCE_BRANCH }}
+            branch_name=${{ needs.build.outputs.SOURCE_BRANCH }}
           else
             branch_name=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
           fi
@@ -137,3 +173,4 @@ jobs:
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE_BRANCH: ${{ needs.build.outputs.SOURCE_BRANCH }}
