@@ -7,7 +7,7 @@ permissions: write-all
 
 jobs:
   build:
-    if: github.event.comment.body == 'PYLINT&PYTEST'
+    if: github.event.comment.body == 'Python Code Quality Check'
     runs-on: ubuntu-latest
     strategy:
       matrix:
