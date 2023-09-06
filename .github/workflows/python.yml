@@ -14,9 +14,10 @@ jobs:
         python-version: ["3.10"]
     steps:
       - uses: actions/checkout@v4
-        if: github.event.issue.pull_request
-        with:
-          ref: ${{ github.event.issue.pull_request.head.ref }}
+      - name: Checkout Pull Request
+        run: hub pr checkout ${{ github.event.issue.number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
@@ -85,17 +86,19 @@ jobs:
           commit_url="https://github.com/${GITHUB_REPOSITORY}/commit/${commit_hash}"
 
           if [ ${{ github.event.issue.pull_request }} ] ; then
-            branch_name="${{ github.event.issue.pull_request.head.ref }}"
+            pr_info=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${{ github.event.issue.number }}")
+            branch_name=$(echo "$pr_info" | jq -r '.head.ref')
           else
-            branch_name="${{ github.repository.default_branch }}"
+            branch_name=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
           fi
 
           branch_name=$(echo "$branch_name" | sed 's/ /_/g' | sed 's/-/--/g' | sed 's/_/__/g')
-          commit_badage=" <a href=\"${commit_url}\" target=\"_blank\" rel=\"noopener noreferrer\"><img alt=\"Static Badge\" src=\"https://img.shields.io/badge/${branch_name}-${commit_hash:0:7}-red?logo=git&logoColor=white\">"
+          commit_badage=" <a href=\"${commit_url}\"><img alt=\"Static Badge\" src=\"https://img.shields.io/badge/${branch_name}-${commit_hash:0:7}-red?logo=git&logoColor=white\">"
 
           echo -e \
           """
-          <a href=\"${triggered_comment_url}\" target=\"_blank\" rel=\"noopener noreferrer\"><img alt=\"Static Badge\" src=\"https://img.shields.io/badge/TRIGGERED_BY-${github_user_id}-blue?logo=github&logoColor=white\">$(echo "${commit_badage}")
+          <a href=\"${triggered_comment_url}\"><img alt=\"Static Badge\" src=\"https://img.shields.io/badge/TRIGGERED_BY-${github_user_id}-blue?logo=github&logoColor=white\">$(echo "${commit_badage}")
           - $pylint_result
             <details>
               <summary>pylint result</summary>
