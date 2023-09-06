@@ -86,15 +86,7 @@ jobs:
           commit_hash=$(git rev-parse HEAD)
           commit_url="https://github.com/${GITHUB_REPOSITORY}/commit/${commit_hash}"
 
-          if [ ${{ github.event.issue.pull_request }} ] ; then
-            pr_info=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
-              "https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${{ github.event.issue.number }}")
-            branch_name=$(echo "$pr_info" | jq -r '.head.ref')
-          else
-            branch_name=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
-          fi
-
-          branch_name=$(echo "$branch_name" | sed 's/ /_/g' | sed 's/-/--/g' | sed 's/_/__/g')
+          branch_name=$(git rev-parse --abbrev-ref HEAD | sed 's/ /_/g' | sed 's/-/--/g' | sed 's/_/__/g')
           commit_badage=" <a href=\"${commit_url}\"><img alt=\"Static Badge\" src=\"https://img.shields.io/badge/${branch_name}-${commit_hash:0:7}-red?logo=git&logoColor=white\">"
 
           echo -e \
