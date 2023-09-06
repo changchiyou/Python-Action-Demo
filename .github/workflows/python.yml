@@ -76,28 +76,24 @@ jobs:
         continue-on-error: true
       - name: Comment the result of pylint&pytest
         run: |
-          if [ ! -z "${{ steps.pylint.outputs.PYLINT_EXIT_CODE }}" ] && [ ${{ steps.pylint.outputs.PYLINT_EXIT_CODE }} -eq 0 ]; then
-            pylint_result=":green_circle: **\`pylint\` passed**"
-          else
-            pylint_result=":red_circle: **\`pylint\` failed**"
-          fi
-          if [ ! -z "${{ steps.mypy.outputs.MYPY_EXIT_CODE }}" ] && [ ${{ steps.mypy.outputs.MYPY_EXIT_CODE }} -eq 0 ]; then
-            mypy_result=":green_circle: **\`mypy\` passed**"
-          else
-            mypy_result=":red_circle: **\`mypy\` failed**"
-          fi
-          if [ ! -z "${{ steps.pytest.outputs.PYTEST_EXIT_CODE }}" ] && [ ${{ steps.pytest.outputs.PYTEST_EXIT_CODE }} -eq 0 ]; then
-            pytest_result=":green_circle: **\`pytest\` passed**"
-          else
-            pytest_result=":red_circle: **\`pytest\` failed**"
-          fi
+          check_exit_code() {
+            if [ ! -z "${1}" ] && [ "${1}" -eq 0 ]; then
+              echo ":green_circle: **\`${2}\` passed**"
+            else
+              echo ":red_circle: **\`${2}\` failed**"
+            fi
+          }
+
+          pylint_result=$(check_exit_code "${{ steps.pylint.outputs.PYLINT_EXIT_CODE }}" "pylint")
+          mypy_result=$(check_exit_code "${{ steps.mypy.outputs.MYPY_EXIT_CODE }}" "mypy")
+          pytest_result=$(check_exit_code "${{ steps.pytest.outputs.PYTEST_EXIT_CODE }}" "pytest")
 
           github_user_id=$(echo "${{ github.event.comment.user.login }}" | sed 's/ /_/g' | sed 's/-/--/g' | sed 's/_/__/g')
           triggered_comment_url="https://github.com/${GITHUB_REPOSITORY}/issues/${{ github.event.issue.number }}#issuecomment-${{ github.event.comment.id }}"
           commit_hash=$(git rev-parse HEAD)
           commit_url="https://github.com/${GITHUB_REPOSITORY}/commit/${commit_hash}"
-
           branch_name=$(git rev-parse --abbrev-ref HEAD | sed 's/ /_/g' | sed 's/-/--/g' | sed 's/_/__/g')
+
           commit_badage=" <a href=\"${commit_url}\"><img alt=\"Static Badge\" src=\"https://img.shields.io/badge/${branch_name}-${commit_hash:0:7}-red?logo=git&logoColor=white\">"
 
           echo -e \
