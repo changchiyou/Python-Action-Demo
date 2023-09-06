@@ -84,7 +84,13 @@ jobs:
           commit_hash=$(git rev-parse HEAD)
           commit_url="https://github.com/${GITHUB_REPOSITORY}/commit/${commit_hash}"
 
-          branch_name=$(echo "${{ github.event.issue.pull_request ? github.event.pull_request.head.ref : github.repository.default_branch}}" | sed 's/ /_/g' | sed 's/-/--/g' | sed 's/_/__/g')
+          if [ ${{ github.event.issue.pull_request }} ] ; then
+            branch_name=${{ github.event.pull_request.head.ref }}
+          else
+            branch_name=${{ github.repository.default_branch }}
+          fi
+
+          branch_name=$(echo "$branch_name" | sed 's/ /_/g' | sed 's/-/--/g' | sed 's/_/__/g')
           commit_badage=" <a href=\"${commit_url}\" target=\"_blank\" rel=\"noopener noreferrer\"><img alt=\"Static Badge\" src=\"https://img.shields.io/badge/${branch_name}-${commit_hash:0:7}-red?logo=git&logoColor=white\">"
 
           echo -e \
