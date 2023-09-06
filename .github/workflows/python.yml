@@ -13,9 +13,22 @@ jobs:
       matrix:
         python-version: ["3.10"]
     steps:
-      - uses: actions/checkout@v3
+      - name: Get branch name
+        id: get_branch_name
+        run: |
+          if [ ${{ github.event.issue.pull_request }} ] ; then
+            pr_info=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${{ github.event.issue.number }}")
+            source_branch=$(echo "$pr_info" | jq -r '.head.ref')
+            echo "SOURCE_BRANCH=$source_branch" >> $GITHUB_OUTPUT
+          else
+            echo "SOURCE_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')" >> $GITHUB_OUTPUT
+          fi
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.get_branch_name.outputs.SOURCE_BRANCH }}
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
@@ -24,25 +37,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install pylint ruff pytest
 
-          git clone https://github.com/${GITHUB_REPOSITORY}.git
-          cd ${GITHUB_REPOSITORY##*/}/
-
-          if [ ${{ github.event.issue.pull_request }} ] ; then
-            pr_info=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
-              "https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${{ github.event.issue.number }}")
-            source_branch=$(echo "$pr_info" | jq -r '.head.ref')
-            echo "SOURCE_BRANCH=$source_branch" >> $GITHUB_OUTPUT
-
-            git checkout ${source_branch}
-          fi
           pip install python-package/
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Analysing the code with pylint
         id: pylint
         run: |
-          cd ${GITHUB_REPOSITORY##*/}/
-
           pylint $(git ls-files '*.py') \
           --ignore=" \
             build, \
@@ -72,8 +72,6 @@ jobs:
       - name: Test with pytest
         id: pytest
         run: |
-          cd ${GITHUB_REPOSITORY##*/}/
-
           pytest > pytest.txt
           echo "PYTEST_EXIT_CODE=$?" >> $GITHUB_OUTPUT
           cat pytest.txt
@@ -91,20 +89,12 @@ jobs:
             pytest_result=":red_circle: **\`pytest\` failed**"
           fi
 
-          cd ${GITHUB_REPOSITORY##*/}/
-
           github_user_id=$(echo "${{ github.event.comment.user.login }}" | sed 's/ /_/g' | sed 's/-/--/g' | sed 's/_/__/g')
           triggered_comment_url="https://github.com/${GITHUB_REPOSITORY}/issues/${{ github.event.issue.number }}#issuecomment-${{ github.event.comment.id }}"
           commit_hash=$(git rev-parse HEAD)
           commit_url="https://github.com/${GITHUB_REPOSITORY}/commit/${commit_hash}"
 
-          if [ ${{ github.event.issue.pull_request }} ] ; then
-            branch_name=${{ steps.install.outputs.SOURCE_BRANCH }}
-          else
-            branch_name=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
-          fi
-
-          branch_name=$(echo "${branch_name}" | sed 's/ /_/g' | sed 's/-/--/g' | sed 's/_/__/g')
+          branch_name=$(echo "${{ steps.install.outputs.SOURCE_BRANCH }}" | sed 's/ /_/g' | sed 's/-/--/g' | sed 's/_/__/g')
           commit_badage=" <a href=\"${commit_url}\" target=\"_blank\" rel=\"noopener noreferrer\"><img alt=\"Static Badge\" src=\"https://img.shields.io/badge/${branch_name}-${commit_hash:0:7}-red?logo=git&logoColor=white\">"
 
           echo -e \
