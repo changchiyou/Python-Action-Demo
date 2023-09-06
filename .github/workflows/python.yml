@@ -20,10 +20,12 @@ jobs:
             pr_info=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
               "https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${{ github.event.issue.number }}")
             source_branch=$(echo "$pr_info" | jq -r '.head.ref')
-            echo "SOURCE_BRANCH=$source_branch" >> $GITHUB_OUTPUT
           else
-            echo "SOURCE_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')" >> $GITHUB_OUTPUT
+            source_branch=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
           fi
+
+          echo "SOURCE_BRANCH=$source_branch" >> $GITHUB_OUTPUT
+          echo "$source_branch"
       - uses: actions/checkout@v4
         with:
           ref: ${{ steps.get_branch_name.outputs.SOURCE_BRANCH }}
