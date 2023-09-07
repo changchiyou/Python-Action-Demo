@@ -24,6 +24,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - uses: actions/cache@v3
+        id: cache-python-dependencies
         with:
           path: ${{ env.pythonLocation }}
           key: ${{ runner.os }}-${{ hashFiles('**/setup.py') }}
@@ -31,6 +32,7 @@ jobs:
             ${{ runner.os }}-
       - name: Install dependencies
         id: install
+        if: steps.cache-python-dependencies.outputs.cache-hit != 'true'
         run: |
           python -m pip install --upgrade pip
           pip install pylint ruff pytest mypy
