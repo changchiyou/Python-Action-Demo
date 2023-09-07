@@ -1,4 +1,4 @@
-name: Pylint & Pytest
+name: Python Code Quality Check
 
 on: issue_comment
 
