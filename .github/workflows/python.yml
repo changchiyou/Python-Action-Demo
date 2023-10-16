@@ -104,7 +104,7 @@ jobs:
               <summary>pylint result</summary>
 
               \`\`\`
-            $(cat -A pylint.txt | sed 's/^/  /')
+            $(cat pylint.txt | sed 's/^/  /')
               \`\`\`
             </details>
           - $mypy_result
@@ -112,7 +112,7 @@ jobs:
               <summary>mypy result</summary>
 
               \`\`\`
-            $(cat -A mypy.txt | sed 's/^/  /')
+            $(cat mypy.txt | sed 's/^/  /')
               \`\`\`
             </details>
           - $pytest_result
@@ -120,7 +120,7 @@ jobs:
               <summary>pytest result</summary>
 
               \`\`\`
-            $(cat -A pytest.txt | sed 's/^/  /')
+            $(cat pytest.txt | sed 's/^/  /')
               \`\`\`
             </details>
           """ > msg
