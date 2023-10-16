@@ -1,10 +1,12 @@
 name: Python Code Quality Check
 
+env:
+  pythonLocation:
+
 on:
   issue_comment:
     types: [created]
 
-# trunk-ignore(checkov/CKV2_GHA_1)
 permissions: write-all
 
 jobs:
@@ -102,7 +104,7 @@ jobs:
               <summary>pylint result</summary>
 
               \`\`\`
-            $(cat -T pylint.txt | sed 's/^/  /')
+            $(cat -A pylint.txt | sed 's/^/  /')
               \`\`\`
             </details>
           - $mypy_result
@@ -110,7 +112,7 @@ jobs:
               <summary>mypy result</summary>
 
               \`\`\`
-            $(cat -T mypy.txt | sed 's/^/  /')
+            $(cat -A mypy.txt | sed 's/^/  /')
               \`\`\`
             </details>
           - $pytest_result
@@ -118,7 +120,7 @@ jobs:
               <summary>pytest result</summary>
 
               \`\`\`
-            $(cat -T pytest.txt | sed 's/^/  /')
+            $(cat -A pytest.txt | sed 's/^/  /')
               \`\`\`
             </details>
           """ > msg
