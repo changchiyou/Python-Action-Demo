@@ -69,7 +69,7 @@ jobs:
         id: pytest
         run: |
           pytest | sed 's/\\n/\n/g' > pytest.txt
-          echo "PYTEST_EXIT_CODE=$?" >> $GITHUB_OUTPUT
+          echo "PYTEST_EXIT_CODE=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
           cat pytest.txt
         continue-on-error: true
       - name: Comment the result of pylint&pytest
