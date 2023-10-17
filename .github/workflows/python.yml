@@ -103,7 +103,7 @@ jobs:
               <summary>pylint result</summary>
 
               \`\`\`
-            $(cat pylint.txt | sed 's/^/  /g' | sed 's/\\n/\\\\n/')
+            $(cat pylint.txt | sed 's/^/  /g' | sed 's/\\n/\\\\n/g')
               \`\`\`
             </details>
           - $mypy_result
@@ -111,7 +111,7 @@ jobs:
               <summary>mypy result</summary>
 
               \`\`\`
-            $(cat mypy.txt | sed 's/^/  /g' | sed 's/\\n/\\\\n/')
+            $(cat mypy.txt | sed 's/^/  /g' | sed 's/\\n/\\\\n/g')
               \`\`\`
             </details>
           - $pytest_result
@@ -119,7 +119,7 @@ jobs:
               <summary>pytest result</summary>
 
               \`\`\`
-            $(cat pytest.txt | sed 's/^/  /g' | sed 's/\\n/\\\\n/')
+            $(cat pytest.txt | sed 's/^/  /g' | sed 's/\\n/\\\\n/g')
               \`\`\`
             </details>
           """ > msg
