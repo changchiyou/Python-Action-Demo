@@ -87,7 +87,7 @@ jobs:
 
           trigger_badage="<a href=\"${triggered_comment_url}\"><img alt=\"Static Badge\" src=\"https://img.shields.io/badge/TRIGGERED_BY-${github_user_id}-blue?logo=github&logoColor=white\">"
           commit_badage="<a href=\"${commit_url}\"><img alt=\"Static Badge\" src=\"https://img.shields.io/badge/${branch_name}-${commit_hash:0:7}-red?logo=git&logoColor=white\">"
-          action_badage="<a href=\"${commit_url}\"><img alt=\"Static Badge\" src=\"https://img.shields.io/badge/Github_Action-${{ github.run_id }}-green?logo=githubactions&logoColor=white\">"
+          action_badage="<a href=\"$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/job/$GITHUB_JOB\"><img alt=\"Static Badge\" src=\"https://img.shields.io/badge/Github_Action-${{ github.run_id }}-green?logo=githubactions&logoColor=white\">"
 
           echo -e \
           """
