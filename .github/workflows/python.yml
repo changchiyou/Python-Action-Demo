@@ -58,14 +58,12 @@ jobs:
         run: |
           pylint python-package/ --rcfile=./.pylintrc | tee pylint.txt
           echo "PYLINT_EXIT_CODE=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
-          cat pylint.txt
         continue-on-error: true
       - name: Run mypy
         id: mypy
         run: |
           mypy . --exclude /build --exclude __init__.py --ignore-missing-imports | tee mypy.txt
           echo "MYPY_EXIT_CODE=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
-          cat mypy.txt
         continue-on-error: true
       - name: Run pytest
         id: pytest
