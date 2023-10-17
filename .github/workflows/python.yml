@@ -120,9 +120,9 @@ jobs:
             $(cat pytest.txt | sed 's/^/  /g' | sed 's/\\n/\\\\n/g')
               \`\`\`
             </details>
-          """ > msg
+          """ | tee msg.txt
 
-          export msg=$(cat msg)
+          export msg=$(cat msg.txt)
 
           if [ ${{ github.event.issue.pull_request }} ] ; then
             gh pr comment "${{ github.event.issue.number }}" --body "$msg"
