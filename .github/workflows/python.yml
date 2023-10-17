@@ -139,7 +139,9 @@ jobs:
           msg=$(cat msg.txt)
 
           if [ "$if_pytest_too_long" = true ]; then
-            msg+="\n\n  :warning: **Output is too long and was truncated.** You can read full pytest report in \`Run pytest\` step of [Github Action]($action_url)."
+            msg+="
+
+              :warning: **Output is too long and was truncated.** You can read full pytest report in \`Run pytest\` step of [Github Action]($action_url)."
           fi
 
           if [ ${{ github.event.issue.pull_request }} ] ; then
