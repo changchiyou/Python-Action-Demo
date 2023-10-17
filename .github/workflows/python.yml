@@ -97,6 +97,15 @@ jobs:
           commit_badage="<a href=\"${commit_url}\"><img alt=\"Static Badge\" src=\"https://img.shields.io/badge/${branch_name}-${commit_hash:0:7}-red?logo=git&logoColor=white\">"
           action_badage="<a href=\"$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/job/${{ steps.set-job-id.outputs.jobId }}\"><img alt=\"Static Badge\" src=\"https://img.shields.io/badge/Github_Action-${{ github.run_id }}-green?logo=githubactions&logoColor=white\">"
 
+          pylint_txt=$(cat pylint.txt | sed 's/^/  /g' | sed 's/\\/\\\\/g')
+          mypy_txt=$(cat mypy.txt | sed 's/^/  /g' | sed 's/\\/\\\\/g')
+          pytest_txt=$(cat pytest.txt | sed 's/^/  /g' | sed 's/\\/\\\\/g')
+
+          if [ ${#pytest_txt} -gt 60000 ]; then
+            if_pytest_too_long=true
+            pytest_txt="${pytest_txt:0:60000}..."
+          fi
+
           echo -e \
           """
           $(echo "${trigger_badage} ${commit_badage} ${action_badage}")
@@ -105,7 +114,7 @@ jobs:
               <summary>pylint result</summary>
 
               \`\`\`
-            $(cat pylint.txt | sed 's/^/  /g' | sed 's/\\/\\\\/g')
+            $pylint_txt
               \`\`\`
             </details>
           - $mypy_result
@@ -113,7 +122,7 @@ jobs:
               <summary>mypy result</summary>
 
               \`\`\`
-            $(cat mypy.txt | sed 's/^/  /g' | sed 's/\\/\\\\/g')
+            $mypy_txt
               \`\`\`
             </details>
           - $pytest_result
@@ -121,12 +130,16 @@ jobs:
               <summary>pytest result</summary>
 
               \`\`\`
-            $(cat pytest.txt | sed 's/^/  /g' | sed 's/\\/\\\\/g')
+            $pytest_txt
               \`\`\`
             </details>
           """ | tee msg.txt
 
-          export msg=$(cat msg.txt)
+          msg=$(cat msg.txt)
+
+          if [ "$if_pytest_too_long" = true ]; then
+            msg+="  :warning: Output is too long and was truncated. You can read full pytest report in $action_badage"
+          fi
 
           if [ ${{ github.event.issue.pull_request }} ] ; then
             gh pr comment "${{ github.event.issue.number }}" --body "$msg"
