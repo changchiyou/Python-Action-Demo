@@ -95,7 +95,8 @@ jobs:
 
           trigger_badage="<a href=\"${triggered_comment_url}\"><img alt=\"Static Badge\" src=\"https://img.shields.io/badge/TRIGGERED_BY-${github_user_id}-blue?logo=github&logoColor=white\">"
           commit_badage="<a href=\"${commit_url}\"><img alt=\"Static Badge\" src=\"https://img.shields.io/badge/${branch_name}-${commit_hash:0:7}-red?logo=git&logoColor=white\">"
-          action_badage="<a href=\"$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/job/${{ steps.set-job-id.outputs.jobId }}\"><img alt=\"Static Badge\" src=\"https://img.shields.io/badge/Github_Action-${{ github.run_id }}-green?logo=githubactions&logoColor=white\">"
+          action_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/job/${{ steps.set-job-id.outputs.jobId }}"
+          action_badage="<a href=\"$action_url\"><img alt=\"Static Badge\" src=\"https://img.shields.io/badge/Github_Action-${{ github.run_id }}-green?logo=githubactions&logoColor=white\">"
 
           pylint_txt=$(cat pylint.txt | sed 's/^/  /g' | sed 's/\\/\\\\/g')
           mypy_txt=$(cat mypy.txt | sed 's/^/  /g' | sed 's/\\/\\\\/g')
@@ -138,7 +139,7 @@ jobs:
           msg=$(cat msg.txt)
 
           if [ "$if_pytest_too_long" = true ]; then
-            msg+="  :warning: Output is too long and was truncated. You can read full pytest report in $action_badage"
+            msg+="  :warning: **Output is too long and was truncated.** You can read full pytest report in `Run pytest` step of [Github Action]($action_url)."
           fi
 
           if [ ${{ github.event.issue.pull_request }} ] ; then
