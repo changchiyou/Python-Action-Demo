@@ -85,11 +85,13 @@ jobs:
           commit_url="https://github.com/${GITHUB_REPOSITORY}/commit/${commit_hash}"
           branch_name=$(git rev-parse --abbrev-ref HEAD | sed 's/ /_/g' | sed 's/-/--/g' | sed 's/_/__/g')
 
-          commit_badage=" <a href=\"${commit_url}\"><img alt=\"Static Badge\" src=\"https://img.shields.io/badge/${branch_name}-${commit_hash:0:7}-red?logo=git&logoColor=white\">"
+          trigger_badage="<a href=\"${triggered_comment_url}\"><img alt=\"Static Badge\" src=\"https://img.shields.io/badge/TRIGGERED_BY-${github_user_id}-blue?logo=github&logoColor=white\">"
+          commit_badage="<a href=\"${commit_url}\"><img alt=\"Static Badge\" src=\"https://img.shields.io/badge/${branch_name}-${commit_hash:0:7}-red?logo=git&logoColor=white\">"
+          action_badage="<a href=\"${commit_url}\"><img alt=\"Static Badge\" src=\"https://img.shields.io/badge/Github_Action-${{ github.run_id }}-green?logo=githubactions&logoColor=white\">"
 
           echo -e \
           """
-          <a href=\"${triggered_comment_url}\"><img alt=\"Static Badge\" src=\"https://img.shields.io/badge/TRIGGERED_BY-${github_user_id}-blue?logo=github&logoColor=white\">$(echo "${commit_badage}")
+          $(echo "${trigger_badage} ${commit_badage} ${action_badage}")
           - $pylint_result
             <details>
               <summary>pylint result</summary>
