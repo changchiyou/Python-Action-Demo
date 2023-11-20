@@ -70,7 +70,7 @@ jobs:
       - name: Run pytest
         id: pytest
         run: |
-          pytest | tee pytest.txt
+          pytest -m "not webtest" -c pytest.ini | tee pytest.txt
           echo "PYTEST_EXIT_CODE=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
         continue-on-error: true
       - name: Comment the result of pylint&pytest
