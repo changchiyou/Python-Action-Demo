@@ -93,10 +93,10 @@ jobs:
           commit_url="https://github.com/${GITHUB_REPOSITORY}/commit/${commit_hash}"
           branch_name=$(git rev-parse --abbrev-ref HEAD | sed 's/ /_/g' | sed 's/-/--/g' | sed 's/_/__/g')
 
-          trigger_badage="<a href=\"${triggered_comment_url}\"><img alt=\"Static Badge\" src=\"https://img.shields.io/badge/TRIGGERED_BY-${github_user_id}-blue?logo=github&logoColor=white\">"
-          commit_badage="<a href=\"${commit_url}\"><img alt=\"Static Badge\" src=\"https://img.shields.io/badge/${branch_name}-${commit_hash:0:7}-red?logo=git&logoColor=white\">"
+          trigger_badage="<a href=\"${triggered_comment_url}\"><img alt=\"Static Badge\" src=\"https://img.shields.io/badge/TRIGGERED_BY-${github_user_id}-blue?logo=github&logoColor=white\"></a>"
+          commit_badage="<a href=\"${commit_url}\"><img alt=\"Static Badge\" src=\"https://img.shields.io/badge/${branch_name}-${commit_hash:0:7}-red?logo=git&logoColor=white\"></a>"
           action_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/job/${{ steps.set-job-id.outputs.jobId }}"
-          action_badage="<a href=\"$action_url\"><img alt=\"Static Badge\" src=\"https://img.shields.io/badge/Github_Action-${{ github.run_id }}-green?logo=githubactions&logoColor=white\">"
+          action_badage="<a href=\"$action_url\"><img alt=\"Static Badge\" src=\"https://img.shields.io/badge/Github_Action-${{ github.run_id }}-green?logo=githubactions&logoColor=white\"></a>"
 
           pylint_txt=$(cat pylint.txt | sed 's/^/  /g' | sed 's/\\/\\\\/g')
           mypy_txt=$(cat mypy.txt | sed 's/^/  /g' | sed 's/\\/\\\\/g')
