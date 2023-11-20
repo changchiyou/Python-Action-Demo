@@ -109,11 +109,7 @@ jobs:
 
           echo -e \
           """
-          <p align="center">
-            $(echo "${trigger_badage}")
-            $(echo "${commit_badage}")
-            $(echo "${action_badage}")
-          </p>
+          $(echo "${trigger_badage} ${commit_badage} ${action_badage}")
           - $pylint_result
             <details>
               <summary>pylint result</summary>
