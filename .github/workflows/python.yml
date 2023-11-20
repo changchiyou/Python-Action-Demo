@@ -1,76 +1,150 @@
-name: Pylint & Pytest
+name: Python Code Quality Check
 
-on: issue_comment
+env:
+  pythonLocation:
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions: write-all
 
 jobs:
   build:
-    if: github.event.comment.body == 'PYLINT&PYTEST'
+    if: github.event.comment.body == 'Python Code Quality Check'
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ["3.10"]
+    name: ${{ matrix.python-version }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+      - name: Checkout Pull Request
+        if: ${{ github.event.issue.pull_request }}
+        run: |
+          sudo apt-get install -y hub
+          hub pr checkout ${{ github.event.issue.number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get package name
+        id: get-package-name
+        run: |
+          echo "PACKAGE_NAME=$(grep 'name' ./python-package/setup.py | sed -E 's/.*name\s*=\s*["'"'"']([^"'"'"']+)["'"'"'].*/\1/')" >> $GITHUB_OUTPUT
+      - name: set id
+        id: set-job-id
+        uses: ayachensiyuan/get-action-job-id@v1.6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          job-name: ${{ matrix.python-version }}
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
+        id: set-up-python
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pylint ruff pytest
-          pip install python-package/
-      - name: Analysing the code with pylint
+      - uses: actions/cache@v3
+        id: cache
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.cache/pylint
+            ./.mypy_cache
+            ./.pytest_cache
+            **/__pycache__/
+            ${{ env.pythonLocation }}
+            !${{ env.pythonLocation }}/**/site-packages/${{ steps.get-package-name.outputs.PACKAGE_NAME }}*/
+          key: ${{ env.pythonLocation }}-${{ hashFiles('./python-package/setup.py') }}
+      - run: pip install -e './python-package[test]'
+      - name: Run pylint
         id: pylint
         run: |
-          pylint $(git ls-files '*.py') \
-          --ignore=" \
-            build, \
-            __init__.py \
-          " \
-          --disable=" \
-            fixme \
-          " \
-          --load-plugins=" \
-            pylint.extensions.check_elif, \
-            pylint.extensions.bad_builtin, \
-            pylint.extensions.docparams, \
-            pylint.extensions.for_any_all, \
-            pylint.extensions.set_membership, \
-            pylint.extensions.code_style, \
-            pylint.extensions.overlapping_exceptions, \
-            pylint.extensions.typing, \
-            pylint.extensions.redefined_variable_type, \
-            pylint.extensions.comparison_placement, \
-            pylint.extensions.broad_try_clause, \
-            pylint.extensions.dict_init_mutate, \
-            pylint.extensions.consider_refactoring_into_while_condition, \
-          " > pylint.txt
-          echo "PYLINT_EXIT_CODE=$?" >> $GITHUB_OUTPUT
+          pylint python-package/ --rcfile=./.pylintrc | tee pylint.txt
+          echo "PYLINT_EXIT_CODE=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
         continue-on-error: true
-      - name: Test with pytest
+      - name: Run mypy
+        id: mypy
+        run: |
+          mypy . --exclude /build --exclude __init__.py --ignore-missing-imports | tee mypy.txt
+          echo "MYPY_EXIT_CODE=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
+        continue-on-error: true
+      - name: Run pytest
         id: pytest
         run: |
-          pytest > pytest.txt
-          echo "PYTEST_EXIT_CODE=$?" >> $GITHUB_OUTPUT
+          pytest -m "not webtest" -c pytest.ini | tee pytest.txt
+          echo "PYTEST_EXIT_CODE=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
         continue-on-error: true
       - name: Comment the result of pylint&pytest
         run: |
-          if [ ${{ steps.pylint.outputs.PYLINT_EXIT_CODE }} -eq 0 ]; then
-            pylint_result=":green_circle: **\`pylint\` passed**"
-          else
-            pylint_result=":red_circle: **\`pylint\` failed**"
-          fi
-          if [ ${{ steps.pytest.outputs.PYTEST_EXIT_CODE }} -eq 0 ]; then
-            pytest_result=":green_circle: **\`pytest\` passed**"
-          else
-            pytest_result=":red_circle: **\`pytest\` failed**"
+          check_exit_code() {
+            if [ ! -z "${1}" ] && [ "${1}" -eq 0 ]; then
+              echo ":green_circle: **\`${2}\` passed**"
+            else
+              echo ":red_circle: **\`${2}\` failed**"
+            fi
+          }
+
+          pylint_result=$(check_exit_code "${{ steps.pylint.outputs.PYLINT_EXIT_CODE }}" "pylint")
+          mypy_result=$(check_exit_code "${{ steps.mypy.outputs.MYPY_EXIT_CODE }}" "mypy")
+          pytest_result=$(check_exit_code "${{ steps.pytest.outputs.PYTEST_EXIT_CODE }}" "pytest")
+
+          github_user_id=$(echo "${{ github.event.comment.user.login }}" | sed 's/ /_/g' | sed 's/-/--/g' | sed 's/_/__/g')
+          triggered_comment_url="https://github.com/${GITHUB_REPOSITORY}/issues/${{ github.event.issue.number }}#issuecomment-${{ github.event.comment.id }}"
+          commit_hash=$(git rev-parse HEAD)
+          commit_url="https://github.com/${GITHUB_REPOSITORY}/commit/${commit_hash}"
+          branch_name=$(git rev-parse --abbrev-ref HEAD | sed 's/ /_/g' | sed 's/-/--/g' | sed 's/_/__/g')
+
+          trigger_badage="<a href=\"${triggered_comment_url}\"><img alt=\"Static Badge\" src=\"https://img.shields.io/badge/TRIGGERED_BY-${github_user_id}-blue?logo=github&logoColor=white\"></a>"
+          commit_badage="<a href=\"${commit_url}\"><img alt=\"Static Badge\" src=\"https://img.shields.io/badge/${branch_name}-${commit_hash:0:7}-red?logo=git&logoColor=white\"></a>"
+          action_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/job/${{ steps.set-job-id.outputs.jobId }}"
+          action_badage="<a href=\"$action_url\"><img alt=\"Static Badge\" src=\"https://img.shields.io/badge/Github_Action-${{ github.run_id }}-green?logo=githubactions&logoColor=white\"></a>"
+
+          pylint_txt=$(cat pylint.txt | sed 's/^/  /g' | sed 's/\\/\\\\/g')
+          mypy_txt=$(cat mypy.txt | sed 's/^/  /g' | sed 's/\\/\\\\/g')
+          pytest_txt=$(cat pytest.txt | sed 's/^/  /g' | sed 's/\\/\\\\/g')
+
+          if [ ${#pytest_txt} -gt 60000 ]; then
+            if_pytest_too_long=true
+            pytest_txt="${pytest_txt:0:60000}..."
           fi
 
-          echo -e "- $pylint_result\n\t<details><summary>pylint result</summary>\n\n$(cat pylint.txt | sed 's/^/\t/')\n\t</details>\n- $pytest_result\n\t<details><summary>pytest result</summary>\n\n$(cat pytest.txt | sed 's/^/\t/')\n\t</details>" > msg
-          export msg=$(cat msg)
+          echo -e \
+          """
+          $(echo "${trigger_badage} ${commit_badage} ${action_badage}")
+          - $pylint_result
+            <details>
+              <summary>pylint result</summary>
 
-          if [ "${{ github.event.issue.pull_request }}" = true ] ; then
+              \`\`\`
+            $pylint_txt
+              \`\`\`
+            </details>
+          - $mypy_result
+            <details>
+              <summary>mypy result</summary>
+
+              \`\`\`
+            $mypy_txt
+              \`\`\`
+            </details>
+          - $pytest_result
+            <details>
+              <summary>pytest result</summary>
+
+              \`\`\`
+            $pytest_txt
+              \`\`\`
+            </details>
+          """ | tee msg.txt
+
+          msg=$(cat msg.txt)
+
+          if [ "$if_pytest_too_long" = true ]; then
+            msg+="
+
+              :warning: **Output is too long and was truncated.** You can read full pytest report in \`Run pytest\` step of [Github Action]($action_url)."
+          fi
+
+          if [ ${{ github.event.issue.pull_request }} ] ; then
             gh pr comment "${{ github.event.issue.number }}" --body "$msg"
           else
             gh issue comment "${{ github.event.issue.number }}" --body "$msg"
