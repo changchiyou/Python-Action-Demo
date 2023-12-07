@@ -90,7 +90,7 @@ jobs:
             state=success
             description=$(grep -Eo "Your code has been rated at \d*\.\d*/10" "pylint.txt")
           elif [ "${{ steps.run-pylint.outcome }}" != "success" ]; then
-            state=failed
+            state=failure
             description="step failed"
           else
             state=error
