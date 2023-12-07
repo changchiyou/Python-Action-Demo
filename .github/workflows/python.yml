@@ -53,8 +53,8 @@ jobs:
             /repos/${GITHUB_REPOSITORY}/statuses/${{ steps.get-commit-hash.outputs.COMMIT_HASH }} \
             -f state='pending' \
             -f target_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/job/${{ steps.set-job-id.outputs.jobId }}" \
-            -f description="pending" \
-            -f context="$test_tool / ${{ steps.get-commit-hash.outputs.COMMIT_HASH8 }}"
+            -f description="(${{ steps.get-commit-hash.outputs.COMMIT_HASH8 }}) pending" \
+            -f context="$test_tool"
           done
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -91,7 +91,7 @@ jobs:
             description=$(grep -Eo "Your code has been rated at \d*\.\d*/10" "pylint.txt")
           elif [ "${{ steps.run-pylint.outcome }}" != "success" ]; then
             state=failure
-            description="step failed"
+            description="step failing"
           else
             state=error
             description=$(grep -Eo "Your code has been rated at \d*\.\d*/10" "pylint.txt")
@@ -104,10 +104,8 @@ jobs:
           /repos/${GITHUB_REPOSITORY}/statuses/${{ steps.get-commit-hash.outputs.COMMIT_HASH }} \
           -f state="$state" \
           -f target_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/job/${{ steps.set-job-id.outputs.jobId }}" \
-          -f description="$description" \
-          -f context="Pylint / ${{ steps.get-commit-hash.outputs.COMMIT_HASH8 }}" > api_response.json
-
-          cat api_response.json
+          -f description="(${{ steps.get-commit-hash.outputs.COMMIT_HASH8 }}) $description" \
+          -f context="Pylint"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run Mypy
