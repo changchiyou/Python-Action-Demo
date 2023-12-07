@@ -50,7 +50,7 @@ jobs:
           -H "X-GitHub-Api-Version: 2022-11-28" \
           /repos/${GITHUB_REPOSITORY}/statuses/${{ steps.get-commit-hash.outputs.COMMIT_HASH }} \
           -f state='pending' \
-          -f target_url='${action_url}' \
+          -f target_url='https://www.google.com' \
           -f description='${{ steps.get-commit-hash.outputs.COMMIT_HASH }}' \
           -f context='continuous-integration/jenkins'
         env:
