@@ -6,5 +6,13 @@ def hello():
     print("hello")  # test
 
 
+def hello1():
+    ...
+
+
+def yellow():
+    print()
+
+
 if __name__ == "__main__":
     hello()
