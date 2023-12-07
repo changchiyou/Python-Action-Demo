@@ -99,6 +99,12 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: coverage.xml
-      - uses: actions-ecosystem/action-remove-labels@v1
+      - uses: actions/github-script@v7
         with:
-          labels: testing
+          script: |
+            github.rest.issues.removeLabel({
+              issue_number: ${{ github.event.pull_request.number }},
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: [${{ github.event.label.name }}]
+            })
