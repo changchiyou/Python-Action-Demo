@@ -22,8 +22,7 @@ jobs:
       - name: Checkout Pull Request
         if: ${{ github.event.issue.pull_request }}
         run: |
-          sudo apt-get install -y hub
-          hub pr checkout ${{ github.event.issue.number }}
+          gh pr checkout ${{ github.event.issue.number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Get package name
