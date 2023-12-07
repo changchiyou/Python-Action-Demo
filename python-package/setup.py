@@ -9,6 +9,12 @@ tests_require = [
     "pytest-xdist",
     "pytest-console-scripts",
     "pytest-loguru",
+    "types-pytz",
+    "pytest-html",
+    "pytest-flask",
+    "pytest-selenium>=4.0.2",
+    "pytest-cov",
+    "py",
 ]
 
 setup(
