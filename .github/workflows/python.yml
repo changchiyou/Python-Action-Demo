@@ -99,3 +99,6 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: coverage.xml
+      - uses: actions-ecosystem/action-remove-labels@v1
+        with:
+          labels: testing
