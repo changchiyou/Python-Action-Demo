@@ -29,6 +29,10 @@ jobs:
         id: get-package-name
         run: |
           echo "PACKAGE_NAME=$(grep 'name' ./python-package/setup.py | sed -E 's/.*name\s*=\s*["'"'"']([^"'"'"']+)["'"'"'].*/\1/')" >> $GITHUB_OUTPUT
+      - name: Get commit hash
+        id: get-commit-hash
+        run: |
+          echo "COMMIT_HASH=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
       - name: set id
         id: set-job-id
         uses: ayachensiyuan/get-action-job-id@v1.6
@@ -36,6 +40,19 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           job-name: ${{ matrix.python-version }}
+      - name: Set commit status - ${{ github.action }} start
+        id: set-commit-status-action-start
+        run: |
+          action_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/job/${{ steps.set-job-id.outputs.jobId }}"
+          gh api \
+          --method POST \
+          -H "Accept: application/vnd.github+json" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          /repos/${GITHUB_REPOSITORY}/statuses/${{ steps.get-commit-hash.outputs.COMMIT_HASH }} \
+          -f state='pending' \
+          -f target_url='${action_url}' \
+          -f description='${{ steps.get-commit-hash.outputs.COMMIT_HASH }}' \
+          -f context='continuous-integration/jenkins'
       - name: Set up Python ${{ matrix.python-version }}
         id: set-up-python
         uses: actions/setup-python@v4
