@@ -31,7 +31,7 @@ jobs:
       - name: Get commit hash
         id: get-commit-hash
         run: |
-          echo "COMMIT_HASH=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+          echo "COMMIT_HASH=$(git rev-parse HEAD | cut -c 1-8)" >> $GITHUB_OUTPUT
       - name: set id
         id: set-job-id
         uses: ayachensiyuan/get-action-job-id@v1.6
@@ -39,10 +39,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           job-name: ${{ matrix.python-version }}
-      - name: Set commit status - pending
-        id: set-commit-status-action-start
+      - name: Set commit status - all pending
+        id: set-commit-status-all-pending
         run: |
-          commit_hash="${{ steps.get-commit-hash.outputs.COMMIT_HASH }}"
           test_tools=("Pylint" "Mypy" "Pytest")
 
           for test_tool in "${test_tools[@]}"; do
@@ -50,10 +49,10 @@ jobs:
             --method POST \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            /repos/${GITHUB_REPOSITORY}/statuses/$commit_hash \
+            /repos/${GITHUB_REPOSITORY}/statuses/${{ steps.get-commit-hash.outputs.COMMIT_HASH }} \
             -f state='pending' \
             -f target_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/job/${{ steps.set-job-id.outputs.jobId }}" \
-            -f description="${commit_hash:0:7}" \
+            -f description="${{ steps.get-commit-hash.outputs.COMMIT_HASH }}" \
             -f context="$test_tool"
           done
         env:
@@ -76,29 +75,51 @@ jobs:
             !${{ env.pythonLocation }}/**/site-packages/${{ steps.get-package-name.outputs.PACKAGE_NAME }}*/
           key: ${{ env.pythonLocation }}-${{ hashFiles('./python-package/setup.py') }}
       - run: pip install -e './python-package[test]'
-      - name: Run pylint
-        id: pylint
+      - name: Run Pylint
+        id: run-pylint
         run: |
           pylint python-package/ --rcfile=./.pylintrc | tee pylint.txt
-          echo "PYLINT_EXIT_CODE=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
+          echo "EXIT_CODE=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
         continue-on-error: true
-      - name: Run mypy
-        id: mypy
+      - name: Update commit status - Pylint
+        id: update-commit-status-pylint
+        run: |
+          EXIT_CODE=${{ steps.run-pylint.outputs.EXIT_CODE }}
+          if [ "${{ steps.run-pylint.outcome }}" = "success" ] && [ ! -z "$EXIT_CODE" ] && [ "$EXIT_CODE" -eq 0 ]; then; then
+            state=success
+          elif [ "${{ steps.run-pylint.outcome }}" != "success" ]; then
+            state=failed
+          else
+            state=error
+          fi
+
+          gh api \
+          --method POST \
+          -H "Accept: application/vnd.github+json" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          /repos/${GITHUB_REPOSITORY}/statuses/${{ steps.get-commit-hash.outputs.COMMIT_HASH }} \
+          -f state='pending' \
+          -f target_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/job/${{ steps.set-job-id.outputs.jobId }}" \
+          -f description="${{ steps.get-commit-hash.outputs.COMMIT_HASH }}" \
+          -f context="Pylint"
+      - name: Run Mypy
+        id: run-mypy
         run: |
           mypy . --exclude /build --exclude __init__.py --ignore-missing-imports | tee mypy.txt
-          echo "MYPY_EXIT_CODE=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
+          echo "EXIT_CODE=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
         continue-on-error: true
-      - name: Run pytest
-        id: pytest
+      - name: Run Pytest
+        id: run-pytest
         run: |
           pytest --cov=./python-package tests/ --cov-report=xml -m "not webtest" -c pytest.ini | tee pytest.txt
-          echo "PYTEST_EXIT_CODE=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
+          echo "EXIT_CODE=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
         continue-on-error: true
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: coverage.xml
+        continue-on-error: true
       - uses: actions/github-script@v7
         with:
           script: |
