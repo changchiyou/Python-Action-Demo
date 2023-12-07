@@ -44,6 +44,7 @@ jobs:
         id: set-commit-status-action-start
         run: |
           action_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/job/${{ steps.set-job-id.outputs.jobId }}"
+          echo $action_url
           gh api \
           --method POST \
           -H "Accept: application/vnd.github+json" \
