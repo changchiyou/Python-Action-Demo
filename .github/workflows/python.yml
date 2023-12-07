@@ -86,7 +86,7 @@ jobs:
         id: update-commit-status-pylint
         run: |
           EXIT_CODE=${{ steps.run-pylint.outputs.EXIT_CODE }}
-          if [ "${{ steps.run-pylint.outcome }}" = "success" ] && [ ! -z "$EXIT_CODE" ] && [ "$EXIT_CODE" -eq 0 ]; then; then
+          if [ "${{ steps.run-pylint.outcome }}" = "success" ] && [ ! -z "$EXIT_CODE" ] && [ "$EXIT_CODE" -eq 0 ]; then
             state=success
           elif [ "${{ steps.run-pylint.outcome }}" != "success" ]; then
             state=failed
