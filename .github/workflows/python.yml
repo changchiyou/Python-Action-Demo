@@ -103,6 +103,8 @@ jobs:
           -f target_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/job/${{ steps.set-job-id.outputs.jobId }}" \
           -f description="${{ steps.get-commit-hash.outputs.COMMIT_HASH8 }}" \
           -f context="Pylint"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run Mypy
         id: run-mypy
         run: |
