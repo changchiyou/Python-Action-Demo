@@ -53,6 +53,8 @@ jobs:
           -f target_url='${action_url}' \
           -f description='${{ steps.get-commit-hash.outputs.COMMIT_HASH }}' \
           -f context='continuous-integration/jenkins'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Set up Python ${{ matrix.python-version }}
         id: set-up-python
         uses: actions/setup-python@v4
