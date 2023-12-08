@@ -1,2 +1,2 @@
 """init ptest module."""
-from .main import hello, hello1
+from .main import hello, hello1, yellow
