@@ -11,7 +11,7 @@ def hello1():
 
 
 def yellow():
-    print()
+    print("yellow")
 
 
 if __name__ == "__main__":
