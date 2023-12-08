@@ -7,7 +7,7 @@ def hello():
 
 
 def hello1():
-    ...
+    print("hello1")
 
 
 def yellow():
