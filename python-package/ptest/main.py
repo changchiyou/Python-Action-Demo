@@ -14,7 +14,3 @@ def hello1():
 def yellow():
     """demo function."""
     print("yellow")
-
-
-if __name__ == "__main__":
-    hello()
