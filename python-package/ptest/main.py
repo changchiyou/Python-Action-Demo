@@ -7,10 +7,12 @@ def hello():
 
 
 def hello1():
+    """demo function."""
     print("hello1")
 
 
 def yellow():
+    """demo function."""
     print("yellow")
 
 
