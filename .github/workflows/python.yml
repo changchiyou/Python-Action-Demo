@@ -88,13 +88,13 @@ jobs:
           cat pylint.txt
           if [ "${{ steps.run-pylint.outcome }}" = "success" ] && [ ! -z "${{ steps.run-pylint.outputs.EXIT_CODE }}" ] && [ ${{ steps.run-pylint.outputs.EXIT_CODE }} -eq 0 ]; then
             state=success
-            description=$(grep -Eo "Your code has been rated at \d*\.\d*/10" "pylint.txt")
+            description="$(grep -Eo "Your code has been rated at \d*\.\d*/10" "pylint.txt")""
           elif [ "${{ steps.run-pylint.outcome }}" != "success" ]; then
             state=failure
             description="step failing"
           else
             state=error
-            description=$(grep -Eo "Your code has been rated at \d*\.\d*/10" "pylint.txt")
+            description="$(grep -Eo "Your code has been rated at \d*\.\d*/10" "pylint.txt")""
           fi
 
           gh api \
