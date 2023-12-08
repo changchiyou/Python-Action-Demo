@@ -85,15 +85,14 @@ jobs:
       - name: Update commit status - Pylint
         id: update-commit-status-pylint
         run: |
-          cat pylint.txt
           if [ "${{ steps.run-pylint.outcome }}" = "success" ] && [ ! -z "${{ steps.run-pylint.outputs.EXIT_CODE }}" ] && [ ${{ steps.run-pylint.outputs.EXIT_CODE }} -eq 0 ]; then
-            state=success
+            state="success"
             description="$(grep -Eo "Your code has been rated at \d*\.\d*/10" "pylint.txt")""
           elif [ "${{ steps.run-pylint.outcome }}" != "success" ]; then
-            state=failure
+            state="failure"
             description="step failing"
           else
-            state=failure
+            state="failure"
             description="$(grep -Eo "Your code has been rated at \d*\.\d*/10" "pylint.txt")""
           fi
 
