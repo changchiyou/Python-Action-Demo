@@ -18,6 +18,6 @@ def test_print1(capsys):
     assert captured.out == "hello1\n"
 
 
-def test_failed():
-    """failed unit-test for testing github action workflow."""
-    assert False
+# def test_failed():
+#     """failed unit-test for testing github action workflow."""
+#     assert False
