@@ -24,5 +24,5 @@ setup(
     url="https://github.com/changchiyou/Github-Action-Test",
     extras_require={"test": tests_require},
     description="for testing github action",
-    packages=find_packages(),
+    packages=["ptest"],
 )
