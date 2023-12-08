@@ -93,7 +93,7 @@ jobs:
             state=failure
             description="step failing"
           else
-            state=error
+            state=failure
             description="$(grep -Eo "Your code has been rated at \d*\.\d*/10" "pylint.txt")""
           fi
 
