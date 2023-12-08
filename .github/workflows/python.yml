@@ -85,6 +85,7 @@ jobs:
       - name: Update commit status - Pylint
         id: update-commit-status-pylint
         run: |
+          state="";description=""
           if [ "${{ steps.run-pylint.outcome }}" = "success" ] && [ ! -z "${{ steps.run-pylint.outputs.EXIT_CODE }}" ] && [ ${{ steps.run-pylint.outputs.EXIT_CODE }} -eq 0 ]; then
             state="success"
             description="$(grep -Eo "Your code has been rated at \d*\.\d*/10" "pylint.txt")""
@@ -95,9 +96,6 @@ jobs:
             state="error"
             description="$(grep -Eo "Your code has been rated at \d*\.\d*/10" "pylint.txt")""
           fi
-
-          echo "Debug: state=$state"
-
 
           gh api \
           --method POST \
