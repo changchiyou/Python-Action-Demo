@@ -151,7 +151,7 @@ jobs:
       - name: Run Pytest
         id: run-pytest
         run: |
-          pytest --cov=./ptest tests/ --cov-report=xml -m "not webtest" -c pytest.ini | tee pytest.txt
+          pytest --cov=./${{ steps.get-package-name.outputs.PACKAGE_NAME }} tests/ --cov-report=xml -m "not webtest" -c pytest.ini | tee pytest.txt
           echo "EXIT_CODE=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
         continue-on-error: true
       - name: Update commit status - Pytest
