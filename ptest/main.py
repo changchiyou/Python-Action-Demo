@@ -14,3 +14,7 @@ def hello1():
 def yellow():
     """demo function."""
     print("yellow")
+
+
+def rainbow():
+    print("")

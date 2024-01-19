@@ -25,6 +25,6 @@ def test_yellow(capsys):
     assert captured.out == "yellow\n"
 
 
-# def test_failed():
-#     """failed unit-test for testing github action workflow."""
-#     assert False
+def test_failed():
+    """failed unit-test for testing github action workflow."""
+    assert False
