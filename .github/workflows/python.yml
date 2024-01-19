@@ -92,7 +92,7 @@ jobs:
           if [ "${{ steps.run-pylint.outcome }}" = "success" ] && [ ! -z "${{ steps.run-pylint.outputs.EXIT_CODE }}" ] && [ ${{ steps.run-pylint.outputs.EXIT_CODE }} -eq 0 ]; then
             state="success"
             description="$(grep -Eo "Your code has been rated at [0-9]*\.[0-9]*/10" "pylint.txt")"
-          elif [ "${{ steps.run-pylint.outcome }}" != "success" ] || { [ ! -z "${{ steps.run-pylint.outputs.EXIT_CODE }}" ] && [ ${{ steps.run-pylint.outputs.EXIT_CODE }} -ne 0 ]; }; then
+          elif [ "${{ steps.run-pylint.outcome }}" != "success" ] && [ ! -z "${{ steps.run-pylint.outputs.EXIT_CODE }}" ] && [ ${{ steps.run-pylint.outputs.EXIT_CODE }} -ne 0 ]; then
             state="failure"
             description="step failing"
           elif [ "${{ steps.run-pylint.outcome }}" = "success" ] && [ ! -z "${{ steps.run-pylint.outputs.EXIT_CODE }}" ] && [ ${{ steps.run-pylint.outputs.EXIT_CODE }} -ne 0 ]; then
@@ -126,7 +126,7 @@ jobs:
           if [ "${{ steps.run-mypy.outcome }}" = "success" ] && [ ! -z "${{ steps.run-mypy.outputs.EXIT_CODE }}" ] && [ ${{ steps.run-mypy.outputs.EXIT_CODE }} -eq 0 ]; then
             state="success"
             description="$(tail -1 "mypy.txt")"
-          elif [ "${{ steps.run-mypy.outcome }}" != "success" ] || { [ ! -z "${{ steps.run-mypy.outputs.EXIT_CODE }}" ] && [ ${{ steps.run-mypy.outputs.EXIT_CODE }} -ne 0 ]; }; then
+          elif [ "${{ steps.run-mypy.outcome }}" != "success" ] && [ ! -z "${{ steps.run-mypy.outputs.EXIT_CODE }}" ] && [ ${{ steps.run-mypy.outputs.EXIT_CODE }} -ne 0 ]; then
             state="failure"
             description="step failing"
           elif [ "${{ steps.run-mypy.outcome }}" = "success" ] && [ ! -z "${{ steps.run-mypy.outputs.EXIT_CODE }}" ] && [ ${{ steps.run-mypy.outputs.EXIT_CODE }} -ne 0 ]; then
@@ -160,7 +160,7 @@ jobs:
           if [ "${{ steps.run-pytest.outcome }}" = "success" ] && [ ! -z "${{ steps.run-pytest.outputs.EXIT_CODE }}" ] && [ ${{ steps.run-pytest.outputs.EXIT_CODE }} -eq 0 ]; then
             state="success"
             description="$(tail -1 "pytest.txt" | tr -d = | awk '{$1=$1};1')"
-          elif [ "${{ steps.run-pytest.outcome }}" != "success" ] || { [ ! -z "${{ steps.run-pytest.outputs.EXIT_CODE }}" ] && [ ${{ steps.run-pytest.outputs.EXIT_CODE }} -ne 0 ]; }; then
+          elif [ "${{ steps.run-pytest.outcome }}" != "success" ] && [ ! -z "${{ steps.run-pytest.outputs.EXIT_CODE }}" ] && [ ${{ steps.run-pytest.outputs.EXIT_CODE }} -ne 0 ]; then
             state="failure"
             description="step failing"
           elif [ "${{ steps.run-pytest.outcome }}" = "success" ] && [ ! -z "${{ steps.run-pytest.outputs.EXIT_CODE }}" ] && [ ${{ steps.run-pytest.outputs.EXIT_CODE }} -ne 0 ]; then
@@ -203,7 +203,7 @@ jobs:
 
             description="$coverage / $threshold.00%"
 
-          elif [ "${{ steps.show-coverage-report.outcome }}" != "success" ] || { [ ! -z "${{ steps.show-coverage-report.outputs.EXIT_CODE }}" ] && [ ${{ steps.show-coverage-report.outputs.EXIT_CODE }} -ne 0 ]; }; then
+          elif [ "${{ steps.show-coverage-report.outcome }}" != "success" ] && [ ! -z "${{ steps.show-coverage-report.outputs.EXIT_CODE }}" ] && [ ${{ steps.show-coverage-report.outputs.EXIT_CODE }} -ne 0 ]; then
             state="failure"
             description="step failing"
           fi
