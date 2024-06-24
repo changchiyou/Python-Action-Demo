@@ -1,0 +1,9 @@
+[coverage:report]
+skip_empty = true
+fail_under = 65
+show_missing = True
+precision = 2
+
+[run]
+omit =
+    tests/**/*.py

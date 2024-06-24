@@ -151,7 +151,7 @@ jobs:
       - name: Run Pytest
         id: run-pytest
         run: |
-          pytest --cov=./${{ steps.get-package-name.outputs.PACKAGE_NAME }} tests/ --cov-report=xml -m "not webtest" -c pytest.ini | tee pytest.txt
+          pytest -c pytest.ini | tee pytest.txt
           echo "EXIT_CODE=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
         continue-on-error: true
       - name: Update commit status - Pytest
@@ -185,27 +185,28 @@ jobs:
       - name: Show Coverage Report
         id: show-coverage-report
         run: |
-          coverage report -m --precision=2 | tee coverage.txt
+          coverage report | tee coverage.txt
           echo "EXIT_CODE=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
+        continue-on-error: true
       - name: Update commit status - Coverage
         id: update-commit-status-coverage
         run: |
+          COVERAGERC_FILE=".coveragerc"
+          fail_under_value=$(grep -E '^\s*fail_under\s*=' "$COVERAGERC_FILE" | awk -F '=' '{gsub(/[ \t]+$/, "", $2); print $2}')
+          threshold=$(printf "%.2f" "$fail_under_value")
+
+          COVERAGE_FILE="coverage.txt"
+          coverage=$(awk '/^TOTAL/ {print $NF}' "$COVERAGE_FILE")
+
           if [ "${{ steps.show-coverage-report.outcome }}" = "success" ] && [ ! -z "${{ steps.show-coverage-report.outputs.EXIT_CODE }}" ] && [ ${{ steps.show-coverage-report.outputs.EXIT_CODE }} -eq 0 ]; then
-            coverage=$(tail -n 1 coverage.txt | awk '{print $NF}')
-            coverage_int=$(tail -n 1 coverage.txt | awk '{sub(/%/, ""); print int($NF)}')
-            threshold=$(cat "coverage.ini")
-
-            if [ "$coverage_int" -ge "$threshold" ]; then
-              state="success"
-            else
-              state="error"
-            fi
-
-            description="$coverage / $threshold.00%"
-
+            state="success"
+            description="$coverage / $threshold%"
           elif [ "${{ steps.show-coverage-report.outcome }}" != "success" ] && [ ! -z "${{ steps.show-coverage-report.outputs.EXIT_CODE }}" ] && [ ${{ steps.show-coverage-report.outputs.EXIT_CODE }} -ne 0 ]; then
             state="failure"
             description="step failing"
+          elif [ "${{ steps.show-coverage-report.outcome }}" = "success" ] && [ ! -z "${{ steps.show-coverage-report.outputs.EXIT_CODE }}" ] && [ ${{ steps.show-coverage-report.outputs.EXIT_CODE }} -ne 0 ]; then
+            state="error"
+            description="$coverage / $threshold%"
           fi
 
           echo "state: $state"

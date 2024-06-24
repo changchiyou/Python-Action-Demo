@@ -1,5 +1,6 @@
 """test ptest."""
 from ptest import hello, hello1, yellow
+import pytest
 
 
 def test_print(capsys):
@@ -24,7 +25,11 @@ def test_yellow(capsys):
     captured = capsys.readouterr()
     assert captured.out == "yellow\n"
 
-
 # def test_failed():
 #     """failed unit-test for testing github action workflow."""
 #     assert False
+
+@pytest.mark.webtest
+def test_mark():
+    """deselected unit-test for testing github action workflow."""
+    assert False
