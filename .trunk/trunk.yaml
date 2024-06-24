@@ -9,7 +9,7 @@ plugins:
 runtimes:
   enabled:
     - node@18.12.1
-    - python@3.10.8
+    # - python@3.10.8
 lint:
   enabled:
     - actionlint@1.6.26

@@ -117,7 +117,7 @@ jobs:
       - name: Run Mypy
         id: run-mypy
         run: |
-          mypy . --exclude build/ --exclude __init__.py --ignore-missing-imports | tee mypy.txt
+          mypy . | tee mypy.txt
           echo "EXIT_CODE=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
         continue-on-error: true
       - name: Update commit status - Mypy

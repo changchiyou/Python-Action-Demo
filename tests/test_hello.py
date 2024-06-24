@@ -1,6 +1,8 @@
 """test ptest."""
-from ptest import hello, hello1, yellow
+
 import pytest
+
+from ptest import hello, hello1, yellow
 
 
 def test_print(capsys):
